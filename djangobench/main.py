@@ -102,7 +102,7 @@ def run_benchmarks(control, experiment, benchmark_dir, benchmarks, trials,
                 print
             else:
                 f = open(record_dir.child('%s.json' % control), 'w')
-                simplejson.dumps(control_data.runtimes, f, default=json_encode_custom)
+                simplejson.dump(control_data.runtimes, f, default=json_encode_custom)
                 f.close()
 
 def discover_benchmarks(benchmark_dir):
@@ -311,6 +311,12 @@ def main():
         action = 'store_true',
         help = 'Continue with the remaining benchmarks if any fail',
     )
+    parser.add_argument(
+        '--control-only',
+        dest = 'control_only',
+        action = 'store_true',
+        help = 'Log raw data of the control branch to record dir. Useful for timeseries generation.',
+    )
 
     args = parser.parse_args()
     run_benchmarks(
@@ -322,7 +328,8 @@ def main():
         vcs = args.vcs,
         record_dir = args.record,
         profile_dir = args.profile_dir,
-        continue_on_errror = args.continue_on_errror
+        continue_on_errror = args.continue_on_errror,
+        control_only = args.control_only
     )
 
 if __name__ == '__main__':

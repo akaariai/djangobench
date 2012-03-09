@@ -47,17 +47,16 @@ if __name__ == '__main__':
         for pos, line in enumerate(lines):
             if line.startswith('commit'):
                 commit = line[7:]
-                try:
-                    f = open('%s%s.json' % (target_dir_raw, commit), 'r')
-	            data = simplejson.loads(f.read())
-                    results = data[0][1]
-                    # _very_ crude outlier removal
-                    results = results[2:len(results)-2]
-                    flot_data.append(sum(results)/len(results))
-                    # (commit id, author and date, actual commit message)
-                    flot_metadata.append([lines[pos] + '\n' + lines[pos + 1] + '\n' + lines[pos + 2], lines[pos + 4]])
-                except IOError as e:
-                    print e
+                f = open('%s%s.json' % (target_dir_raw, commit), 'r')
+                f.seek(0)
+	        data = simplejson.loads(f.read())
+                f.close()
+                # _very_ crude outlier removal
+                data.sort()
+                results = data[2:len(data)-2]
+                flot_data.append(sum(results)/len(results))
+                # (commit id, author and date, actual commit message)
+                flot_metadata.append([lines[pos] + '\n' + lines[pos + 1] + '\n' + lines[pos + 2], lines[pos + 4]])
         
         flot_data = [[i, d] for i, d in zip(range(len(flot_data), 0, -1), flot_data)]
         flotdata = open('%sflot.json' % target_dir, 'w+')
