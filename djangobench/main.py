@@ -16,7 +16,9 @@ __version__ = '0.9'
 
 DEFAULT_BENCHMARK_DIR = Path(__file__).parent.child('benchmarks').absolute()
 
-def run_benchmarks(control, experiment, benchmark_dir, benchmarks, trials, vcs=None, record_dir=None, profile_dir=None, continue_on_errror=False):
+def run_benchmarks(control, experiment, benchmark_dir, benchmarks, trials,
+                  vcs=None, record_dir=None, profile_dir=None, continue_on_errror=False,
+                  control_only=False):
     if benchmarks:
         print "Running benchmarks: %s" % " ".join(benchmarks)
     else:
@@ -29,10 +31,12 @@ def run_benchmarks(control, experiment, benchmark_dir, benchmarks, trials, vcs=N
         print "Recording data to '%s'" % record_dir
 
     control_label = get_django_version(control, vcs=vcs)
-    experiment_label = get_django_version(experiment, vcs=vcs)
+    if not control_only:
+        experiment_label = get_django_version(experiment, vcs=vcs)
     branch_info = "%s branch " % vcs if vcs else ""
     print "Control: Django %s (in %s%s)" % (control_label, branch_info, control)
-    print "Experiment: Django %s (in %s%s)" % (experiment_label, branch_info, experiment)
+    if not control_only:
+        print "Experiment: Django %s (in %s%s)" % (experiment_label, branch_info, experiment)
     print
 
     # Calculate the subshell envs that we'll use to execute the
@@ -41,25 +45,30 @@ def run_benchmarks(control, experiment, benchmark_dir, benchmarks, trials, vcs=N
         control_env = {
             'PYTHONPATH': '%s:%s' % (Path.cwd().absolute(), Path(benchmark_dir)),
         }
-        experiment_env = control_env.copy()
+        if not control_only:
+            experiment_env = control_env.copy()
     else:
         control_env = {'PYTHONPATH': '%s:%s' % (Path(control).absolute(), Path(benchmark_dir))}
-        experiment_env = {'PYTHONPATH': '%s:%s' % (Path(experiment).absolute(), Path(benchmark_dir))}
+        if not control_only:
+            experiment_env = {'PYTHONPATH': '%s:%s' % (Path(experiment).absolute(), Path(benchmark_dir))}
 
     for benchmark in discover_benchmarks(benchmark_dir):
         if not benchmarks or benchmark.name in benchmarks:
             print "Running '%s' benchmark ..." % benchmark.name
             settings_mod = '%s.settings' % benchmark.name
             control_env['DJANGO_SETTINGS_MODULE'] = settings_mod
-            experiment_env['DJANGO_SETTINGS_MODULE'] = settings_mod
+            if not control_only:
+                experiment_env['DJANGO_SETTINGS_MODULE'] = settings_mod
             if profile_dir is not None:
                 control_env['DJANGOBENCH_PROFILE_FILE'] = Path(profile_dir, "con-%s" % benchmark.name)
-                experiment_env['DJANGOBENCH_PROFILE_FILE'] = Path(profile_dir, "exp-%s" % benchmark.name)
+                if not control_only:
+                    experiment_env['DJANGOBENCH_PROFILE_FILE'] = Path(profile_dir, "exp-%s" % benchmark.name)
             try:
                 if vcs: switch_to_branch(vcs, control)
                 control_data = run_benchmark(benchmark, trials, control_env)
-                if vcs: switch_to_branch(vcs, experiment)
-                experiment_data = run_benchmark(benchmark, trials, experiment_env)
+                if not control_only:
+                    if vcs: switch_to_branch(vcs, experiment)
+                    experiment_data = run_benchmark(benchmark, trials, experiment_env)
             except SkipBenchmark, reason:
                 print "Skipped: %s\n" % reason
                 continue
@@ -69,27 +78,32 @@ def run_benchmarks(control, experiment, benchmark_dir, benchmarks, trials, vcs=N
                     continue
                 raise
 
-            options = argparse.Namespace(
-                track_memory = False,
-                diff_instrumentation = False,
-                benchmark_name = benchmark.name,
-                disable_timelines = True,
-                control_label = control_label,
-                experiment_label = experiment_label,
-            )
-            result = perf.CompareBenchmarkData(control_data, experiment_data, options)
-            if record_dir:
-                record_benchmark_results(
-                    dest = record_dir.child('%s.json' % benchmark.name),
-                    name = benchmark.name,
-                    result = result,
-                    control = control_label,
-                    experiment = experiment_label,
-                    control_data = control_data,
-                    experiment_data = experiment_data,
+            if not control_only:
+                options = argparse.Namespace(
+                    track_memory = False,
+                    diff_instrumentation = False,
+                    benchmark_name = benchmark.name,
+                    disable_timelines = True,
+                    control_label = control_label,
+                    experiment_label = experiment_label,
                 )
-            print format_benchmark_result(result, len(control_data.runtimes))
-            print
+                result = perf.CompareBenchmarkData(control_data, experiment_data, options)
+                if record_dir:
+                    record_benchmark_results(
+                        dest = record_dir.child('%s.json' % benchmark.name),
+                        name = benchmark.name,
+                        result = result,
+                        control = control_label,
+                        experiment = experiment_label,
+                        control_data = control_data,
+                        experiment_data = experiment_data,
+                    )
+                print format_benchmark_result(result, len(control_data.runtimes))
+                print
+            else:
+                f = open(record_dir.child('%s.json' % control), 'w')
+                simplejson.dumps(control_data.runtimes, f, default=json_encode_custom)
+                f.close()
 
 def discover_benchmarks(benchmark_dir):
     for app in Path(benchmark_dir).listdir(filter=DIRS):
