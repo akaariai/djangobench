@@ -1,0 +1,35 @@
+Usage:
+  - You need to have a git clone of django available. I recommend
+    to have a separate clone just for benchmarking. The benchmarker
+    will munge with the repository (it does a lot of checkouts).
+  - You need a copy of djangobench.
+
+After this, go through the settings.py file. Set up the needed
+settings. Run python logger.py in this directory and see what
+happens.
+
+The runner will constantly call djangobench for different git commits,
+djangobench will in turn create result files for each commit in the
+target_directory/benchmark_name/raw/ directory.
+
+After all the git history has been benchmarked, the logger will go
+through all the result files, collapse each result to an average number,
+and then create a file target_directory/benchmark_name/flot.json (should
+be .js). The file contains three javascript variables:
+  - data: this is just commit sequence number -> result data
+  - metadata: contains information about each commit (in the same order as
+    the data).
+  - version: a timestamp when this file was created.
+
+There is an example.html file which show how to present this data. You need
+flot (tested with 0.7). The example is totally static, so it is best to just
+extract flot to a directory under /var/www, and put the generated flot.json
+to that directory by the name of urlresolve_flotdata.js. Copy the example.html
+to that directory, too. Point your browser to the example.html and hope that
+a zoomable, hoverable graph is shown to you. 
+
+NOTE: when generating the benchmark data, you can stop at any time by ^C.
+You can then add the last commit id to the settings.py file so that the
+generator wont go deeper into history.
+
+TODO: More or less total rewrite. At least for the frontend html.

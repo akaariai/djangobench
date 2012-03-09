@@ -1,0 +1,95 @@
+<html>
+<head>
+
+<script language="javascript" type="text/javascript" src="jquery.min.js"></script>
+<script language="javascript" type="text/javascript" src="jquery.flot.min.js"></script>
+<script language="javascript" type="text/javascript" src="jquery.flot.selection.js"></script>
+<script type="text/javascript" src="urlresolve_flotdata.js"></script>
+<script type="text/javascript">
+   $(document).ready(function() {
+       options = { 
+           xaxis: {show: false},
+           yaxis: {min: 0},
+		   series: {
+                   lines: { show: true },
+           },
+           grid: { hoverable: true },
+           selection: {mode: "xy"},
+       };
+       $.plot($("#placeholder"), [data], options);
+       var previousPoint = null;
+       $("#placeholder").bind("plothover", function (event, pos, item) {
+          if (item) {
+            if (previousPoint != item.dataIndex) {
+                previousPoint = item.dataIndex;
+                
+                $("#tooltip").remove();
+                var x = item.datapoint[0].toFixed(2),
+                    y = item.datapoint[1].toFixed(2);
+                showTooltip(item.pageX, item.pageY, metadata[item.dataIndex][0], metadata[item.dataIndex][1]);
+            }
+          }
+          else {
+              $("#tooltip").remove();
+              previousPoint = null;            
+          } 
+       });
+       // setup overview
+       var overview = $.plot($("#overview"), [data], {
+       series: {
+           lines: { show: true, lineWidth: 1 },
+           shadowSize: 0
+       },
+       xaxis: {show: false},
+       selection: { mode: "xy" }
+    });
+    
+    $("#placeholder").bind("plotselected", function (event, ranges) {
+        // clamp the zooming to prevent eternal zoom
+        if (ranges.xaxis.to - ranges.xaxis.from < 0.00001)
+            ranges.xaxis.to = ranges.xaxis.from + 0.00001;
+        if (ranges.yaxis.to - ranges.yaxis.from < 0.00001)
+            ranges.yaxis.to = ranges.yaxis.from + 0.00001;
+        
+        // do the zooming
+        plot = $.plot($("#placeholder"), [data] ,
+                      $.extend(true, {}, options, {
+                          xaxis: { min: ranges.xaxis.from, max: ranges.xaxis.to },
+                          yaxis: { min: ranges.yaxis.from, max: ranges.yaxis.to }
+                      }));
+        
+        // don't fire event on the overview to prevent eternal loop
+        overview.setSelection(ranges, true);
+    });
+    $("#overview").bind("plotselected", function (event, ranges) {
+        plot.setSelection(ranges);
+    });
+    $("#version").html(version);
+   });
+       
+
+   function showTooltip(x, y, commit_meta, commit_message) {
+        $('<div id="tooltip"><pre>' + commit_meta + '</pre><p>' + commit_message + '</p></div>').css( {
+            position: 'absolute',
+            display: 'none',
+            top: y + 5,
+            left: x + 5,
+            border: '1px solid #fdd',
+            padding: '2px',
+            'background-color': '#fee',
+            opacity: 0.80
+        }).appendTo("body").fadeIn(200);
+    }
+
+</script>
+</head>
+  <body style="width: 800px">
+    <h2>Benchmark: url_resolve</h2>
+    Last update: <span id="version"></span>
+    <div>
+    <div id="placeholder" style="height:500px;width:500px;float:left"></div>
+    <div id="overview" style="height:150px;width:200px;float:right;"></div>
+    </div>
+  </body>
+</html>
+
