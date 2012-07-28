@@ -47,10 +47,12 @@ if __name__ == '__main__':
         for pos, line in enumerate(lines):
             if line.startswith('commit'):
                 commit = line[7:]
-                f = open('%s%s.json' % (target_dir_raw, commit), 'r')
-                f.seek(0)
-	        data = simplejson.loads(f.read())
-                f.close()
+                try:
+                    f = open('%s%s.json' % (target_dir_raw, commit), 'r')
+	            data = simplejson.loads(f.read())
+                    f.close()
+                except Exception, e:
+                    print 'Problem with commit %s, got exception %s' %(commit, e)
                 # _very_ crude outlier removal
                 data.sort()
                 results = data[2:len(data)-2]

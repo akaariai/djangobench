@@ -5,11 +5,11 @@ def benchmark():
     list(MultiField.objects.iterator())
 
 def setup():
-    for i in range(0, 3000):
+    for i in range(0, 1000):
         kwargs = {}
         for j in range(1, 11):
             kwargs['field%s' % j] = 'foobar_%s_%s' % (i, j)
-        MultiField(**kwargs).save()
+        MultiField(**kwargs).save(force_insert=True)
 
 run_benchmark(
     benchmark,

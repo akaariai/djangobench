@@ -6,6 +6,9 @@ RESULTS_DIR = '/home/akaariai/tmp/'
 #   - earliest git commit to include in the benchmark
 #   - dict of parameters to pass to djangobench)
 TESTS = [
-    ('url_resolve', 'c2c622dc045c025e44417a32371991b436118861', {'-t': '30'}),
-    ('query_all', 'c2c622dc045c025e44417a32371991b436118861', {'-t': '20'})
+    #('url_resolve', 'f7a7b09c051faa751b5138d8fc517dbb841caa45', {'-t': '30'}),
+    #('query_all', 'f7a7b09c051faa751b5138d8fc517dbb841caa45', {'-t': '20'}),
+    #('query_all_multifield', 'f7a7b09c051faa751b5138d8fc517dbb841caa45', {'-t': '20'}),
+    #('url_reverse', 'f7a7b09c051faa751b5138d8fc517dbb841caa45', {'-t': '30'}),
+    ('query_annotate', '82a76ef67d944b1a4507cac81476bebba0c90e4a', {'-t': '30'}),
 ]
