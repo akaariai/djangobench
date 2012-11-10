@@ -5,6 +5,8 @@ def benchmark():
     list(MultiField.objects.iterator())
 
 def setup():
+    # Make sure there are no objs from previous runs.
+    MultiField.objects.all().delete()
     for i in range(0, 1000):
         kwargs = {}
         for j in range(1, 11):

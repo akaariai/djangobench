@@ -5,6 +5,7 @@ def benchmark():
     list(MultiField.objects.raw('select id from query_raw_deferred_multifield'))
 
 def setup():
+    MultiField.objects.all().delete()
     for i in range(0, 1000):
         kwargs = {}
         for j in range(1, 11):

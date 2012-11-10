@@ -5,7 +5,9 @@ def benchmark():
     list(Book.objects.iterator())
 
 def setup():
-    for i in range(0, 3000):
+    # Make sure there are no books from previous runs.
+    Book.objects.all().delete()
+    for i in range(0, 1000):
         Book(pk=i,title='foobar_%s' % i ).save(force_insert=True)
 
 run_benchmark(

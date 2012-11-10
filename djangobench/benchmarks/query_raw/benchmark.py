@@ -5,6 +5,7 @@ def benchmark():
     list(MultiField.objects.raw('select * from query_raw_multifield'))
 
 def setup():
+    MultiField.objects.all().delete()
     for i in range(0, 1000):
         kwargs = {}
         for j in range(1, 11):
