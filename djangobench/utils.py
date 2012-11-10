@@ -63,6 +63,7 @@ def run_benchmark(benchmark, syncdb=True, setup=None, trials=None, handle_argv=T
     for x in xrange(trials):
         start = time_f()
         profile_file = os.environ.get('DJANGOBENCH_PROFILE_FILE', None)
+        vals = []
         if profile_file is not None:
             loc = locals().copy()
             profile.runctx('benchmark_result = benchmark()', globals(), loc, profile_file)
@@ -70,9 +71,15 @@ def run_benchmark(benchmark, syncdb=True, setup=None, trials=None, handle_argv=T
         else:
             benchmark_result = benchmark()
         if benchmark_result is not None:
-            print benchmark_result
+            vals.append(benchmark_result)
         else:
-            print time_f() - start
+            vals.append(time_f() - start)
+        vals.sort()
+        # throw out the highest and lowest tenth as a crude outlier
+        # detector...
+        vals = vals[len(vals) / 10 : len(vals) - len(vals) / 10]
+        for val in vals:
+            print val
 
 def run_comparison_benchmark(benchmark_a, benchmark_b, syncdb=True, setup=None, trials=None, handle_argv=True, meta={}):
     """
