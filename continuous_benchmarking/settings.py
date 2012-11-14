@@ -1,14 +1,27 @@
-GIT_DIR = '/home/akaariai/Programming/djbench/'
-DJANGOBENCH = '/home/akaariai/Programming/djangobench/djangobench/main.py'
-RESULTS_DIR = '/home/akaariai/tmp/'
+GIT_DIR = '/home/akaj/Programming/django/'
+DJANGOBENCH = '/home/akaj/Programming/djangobench/djangobench/main.py'
+RESULTS_DIR = '/home/akaj/tmp/'
 # A list of test to run:
 #   - djangobench test name
 #   - earliest git commit to include in the benchmark
 #   - dict of parameters to pass to djangobench)
+MERGE_BASE_DJANGO13 = '7c08f4c6351f7e53a01ff800d8a61f19ca961b29'
+TMP_COMMIT = '00ec03fd'
 TESTS = [
-    #('url_resolve', 'f7a7b09c051faa751b5138d8fc517dbb841caa45', {'-t': '30'}),
-    #('query_all', 'f7a7b09c051faa751b5138d8fc517dbb841caa45', {'-t': '20'}),
-    #('query_all_multifield', 'f7a7b09c051faa751b5138d8fc517dbb841caa45', {'-t': '20'}),
-    #('url_reverse', 'f7a7b09c051faa751b5138d8fc517dbb841caa45', {'-t': '30'}),
-    ('query_annotate', '82a76ef67d944b1a4507cac81476bebba0c90e4a', {'-t': '30'}),
+    ('query_annotate', MERGE_BASE_DJANGO13, {'-t': '30'}),
+    ('url_resolve', MERGE_BASE_DJANGO13, {'-t': '30'}),
+    ('url_resolve_flat', MERGE_BASE_DJANGO13, {'-t': '30'}),
+    ('url_resolve_nested', MERGE_BASE_DJANGO13, {'-t': '30'}),
+    ('url_reverse', MERGE_BASE_DJANGO13, {'-t': '30'}),
+    ('query_complex_filter', MERGE_BASE_DJANGO13, {'-t': '20'}),
+    ('qs_filter_chaining', MERGE_BASE_DJANGO13, {'-t': '20'}),
+    ('query_raw', MERGE_BASE_DJANGO13, {'-t': '20'}),
+    ('query_all', MERGE_BASE_DJANGO13, {'-t': '20'}),
+    ('query_all_multifield', MERGE_BASE_DJANGO13, {'-t': '20'}),
+    ('model_save', MERGE_BASE_DJANGO13, {'-t': '30'}),
+    ('query_select_related', MERGE_BASE_DJANGO13, {'-t': '30'}),
+    ('query_delete', MERGE_BASE_DJANGO13, {'-t': '30'}),
+    ('template_compilation', MERGE_BASE_DJANGO13, {'-t': '30'}),
+    ('template_render', MERGE_BASE_DJANGO13, {'-t': '30'}),
+    ('template_render_simple', MERGE_BASE_DJANGO13, {'-t': '30'}),
 ]

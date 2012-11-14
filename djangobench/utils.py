@@ -14,7 +14,7 @@ except ImportError:
 benchmark_parser = argparse.ArgumentParser()
 benchmark_parser.add_argument('-t', '--trials', type=int, default=100)
 
-def run_benchmark(benchmark, syncdb=True, setup=None, trials=None, handle_argv=True, meta={}):
+def run_benchmark(benchmark, syncdb=True, setup=None, trials=None, handle_argv=True, meta={}, median_only=True):
     """
     Run a benchmark a few times and report the results.
 
@@ -60,6 +60,8 @@ def run_benchmark(benchmark, syncdb=True, setup=None, trials=None, handle_argv=T
     if setup:
         setup()
 
+    import gc
+    gc.collect()
     for x in xrange(trials):
         start = time_f()
         profile_file = os.environ.get('DJANGOBENCH_PROFILE_FILE', None)
@@ -74,12 +76,14 @@ def run_benchmark(benchmark, syncdb=True, setup=None, trials=None, handle_argv=T
             vals.append(benchmark_result)
         else:
             vals.append(time_f() - start)
-        vals.sort()
-        # throw out the highest and lowest tenth as a crude outlier
-        # detector...
-        vals = vals[len(vals) / 10 : len(vals) - len(vals) / 10]
-        for val in vals:
-            print val
+        gc.collect()
+    vals.sort()
+    if median_only:
+        print vals[len(vals) / 2]
+        return
+    vals = vals[len(vals) / 10 : len(vals) - len(vals) / 10]
+    for val in vals:
+        print val
 
 def run_comparison_benchmark(benchmark_a, benchmark_b, syncdb=True, setup=None, trials=None, handle_argv=True, meta={}):
     """
