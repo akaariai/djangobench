@@ -14,7 +14,7 @@ except ImportError:
 benchmark_parser = argparse.ArgumentParser()
 benchmark_parser.add_argument('-t', '--trials', type=int, default=100)
 
-def run_benchmark(benchmark, syncdb=True, setup=None, trials=None, handle_argv=True, meta={}, median_only=True):
+def run_benchmark(benchmark, syncdb=True, setup=None, trials=None, handle_argv=True, meta={}, median_only=False):
     """
     Run a benchmark a few times and report the results.
 
@@ -81,11 +81,12 @@ def run_benchmark(benchmark, syncdb=True, setup=None, trials=None, handle_argv=T
     if median_only:
         print vals[len(vals) / 2]
         return
-    vals = vals[len(vals) / 10 : len(vals) - len(vals) / 10]
+    vals = vals[len(vals) / 3 : len(vals) - len(vals) / 3]
     for val in vals:
         print val
 
-def run_comparison_benchmark(benchmark_a, benchmark_b, syncdb=True, setup=None, trials=None, handle_argv=True, meta={}):
+def run_comparison_benchmark(benchmark_a, benchmark_b, syncdb=True, setup=None, trials=None, handle_argv=True, meta={},
+                             median_only=False):
     """
     Benchmark the difference between two functions.
 
@@ -115,16 +116,26 @@ def run_comparison_benchmark(benchmark_a, benchmark_b, syncdb=True, setup=None, 
     if setup:
         setup()
 
+    vals = []
+    import gc
     for x in xrange(trials):
+        gc.collect()
         start_a = time_f()
         result_a = benchmark_a()
         result_a = result_a or time_f() - start_a
-
+        gc.collect()
         start_b = time_f()
         result_b = benchmark_b()
         result_b = result_b or time_f() - start_b
 
-        print result_a - result_b
+        vals.append(result_a - result_b)
+    vals.sort()
+    if median_only:
+        print vals[len(vals) / 2]
+        return
+    vals = vals[len(vals) / 3 : len(vals) - len(vals) / 3]
+    for val in vals:
+        print val
 
 def print_benchmark_header(benchmark, meta):
     if 'title' not in map(str.lower, meta.keys()):
