@@ -62,10 +62,10 @@ def run_benchmark(benchmark, syncdb=True, setup=None, trials=None, handle_argv=T
 
     import gc
     gc.collect()
+    vals = []
     for x in xrange(trials):
         start = time_f()
         profile_file = os.environ.get('DJANGOBENCH_PROFILE_FILE', None)
-        vals = []
         if profile_file is not None:
             loc = locals().copy()
             profile.runctx('benchmark_result = benchmark()', globals(), loc, profile_file)
@@ -127,8 +127,8 @@ def run_comparison_benchmark(benchmark_a, benchmark_b, syncdb=True, setup=None, 
         start_b = time_f()
         result_b = benchmark_b()
         result_b = result_b or time_f() - start_b
-
         vals.append(result_a - result_b)
+
     vals.sort()
     if median_only:
         print vals[len(vals) / 2]
