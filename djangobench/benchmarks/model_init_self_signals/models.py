@@ -6,3 +6,4 @@ class Book(models.Model):
 def noop(*args, **kwargs):
     pass
 models.signals.pre_init.connect(noop, sender=Book)
+models.signals.post_init.connect(noop, sender=Book)

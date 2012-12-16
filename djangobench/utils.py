@@ -60,8 +60,6 @@ def run_benchmark(benchmark, syncdb=True, setup=None, trials=None, handle_argv=T
     if setup:
         setup()
 
-    import gc
-    gc.collect()
     vals = []
     for x in xrange(trials):
         start = time_f()
@@ -76,7 +74,6 @@ def run_benchmark(benchmark, syncdb=True, setup=None, trials=None, handle_argv=T
             vals.append(benchmark_result)
         else:
             vals.append(time_f() - start)
-        gc.collect()
     vals.sort()
     if median_only:
         print vals[len(vals) / 2]
