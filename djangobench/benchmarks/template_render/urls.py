@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls import *
 
 urlpatterns = patterns('template_render.views',
     url(r'/join/?$', 'join', name='join'),

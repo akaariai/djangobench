@@ -1,4 +1,4 @@
-﻿from django.conf.urls.defaults import *
+﻿from django.conf.urls import *
 
 def generate_filler_patterns(num=1):
     """ Returns a list of url pattern inputs for garbage views """
